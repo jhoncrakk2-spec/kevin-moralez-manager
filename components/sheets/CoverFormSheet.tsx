@@ -48,72 +48,64 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
     setFetching(true);
 
     try {
-      let apiUrl = '';
-
       if (youtubeMatch) {
         // YouTube: usar noembed
-        apiUrl = `https://noembed.com/embed?url=${encodeURIComponent(url)}`;
-      } else if (spotifyMatch) {
-        // Spotify: usar su API directa
-        apiUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`;
-      }
+        const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+        if (res.ok) {
+          const data = await res.json();
 
-      const res = await fetch(apiUrl);
-
-      if (res.ok) {
-        const data = await res.json();
-        console.log('Metadata recibida:', data);
-
-        if (data.title) {
-          // Intentar separar titulo y artista con varios formatos
-          // Formatos comunes: "Artista - Cancion", "Cancion | Artista", "Artista: Cancion"
-          let artistaEncontrado = '';
-          let tituloEncontrado = data.title;
-
-          // Formato: "Artista - Cancion"
-          if (data.title.includes(' - ')) {
-            const parts = data.title.split(' - ');
-            artistaEncontrado = parts[0].trim();
-            tituloEncontrado = parts.slice(1).join(' - ').trim();
-          }
-          // Formato: "Cancion | Artista"
-          else if (data.title.includes(' | ')) {
-            const parts = data.title.split(' | ');
-            tituloEncontrado = parts[0].trim();
-            artistaEncontrado = parts[1]?.trim() || '';
-          }
-          // Formato: "Artista: Cancion"
-          else if (data.title.includes(': ')) {
-            const parts = data.title.split(': ');
-            artistaEncontrado = parts[0].trim();
-            tituloEncontrado = parts.slice(1).join(': ').trim();
+          if (data.title) {
+            // Intentar separar titulo y artista (formato: "Artista - Cancion")
+            if (data.title.includes(' - ')) {
+              const parts = data.title.split(' - ');
+              setArtista(parts[0].trim());
+              // Quitar cosas como "(Official Video)" del titulo
+              let titulo = parts.slice(1).join(' - ').trim();
+              titulo = titulo.replace(/\s*\(.*?\)\s*/g, '').trim();
+              setTitulo(titulo);
+            } else {
+              setTitulo(data.title);
+              if (data.author_name) {
+                setArtista(data.author_name);
+              }
+            }
           }
 
-          setTitulo(tituloEncontrado);
-
-          // Para Spotify, author_name es el artista real
-          if (spotifyMatch && data.author_name) {
-            setArtista(data.author_name);
-          } else if (artistaEncontrado) {
-            setArtista(artistaEncontrado);
-          } else if (data.author_name) {
-            // Para YouTube, author_name es el canal (puede ser el artista)
-            setArtista(data.author_name);
-          }
-        }
-
-        // Thumbnail
-        if (data.thumbnail_url) {
-          setImagen(data.thumbnail_url);
-        }
-
-        // Para YouTube, usar thumbnail de mejor calidad
-        if (youtubeMatch) {
+          // Thumbnail de alta calidad
           const videoId = youtubeMatch[1];
           setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
         }
-      } else {
-        alert('No se pudo obtener la información. Verifica el link.');
+      } else if (spotifyMatch) {
+        // Spotify: obtener titulo y luego buscar artista en iTunes
+        const trackId = spotifyMatch[1];
+        const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
+
+        if (res.ok) {
+          const data = await res.json();
+          const songTitle = data.title || '';
+          setTitulo(songTitle);
+
+          if (data.thumbnail_url) {
+            setImagen(data.thumbnail_url);
+          }
+
+          // Buscar en iTunes para obtener el artista
+          if (songTitle) {
+            try {
+              const itunesRes = await fetch(
+                `https://itunes.apple.com/search?term=${encodeURIComponent(songTitle)}&media=music&limit=1`
+              );
+              if (itunesRes.ok) {
+                const itunesData = await itunesRes.json();
+                if (itunesData.results && itunesData.results.length > 0) {
+                  setArtista(itunesData.results[0].artistName);
+                }
+              }
+            } catch (e) {
+              console.log('iTunes search failed, continuing without artist');
+            }
+          }
+        }
       }
     } catch (e) {
       console.error('Error:', e);
