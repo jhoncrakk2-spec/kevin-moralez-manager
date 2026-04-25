@@ -62,18 +62,43 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
 
       if (res.ok) {
         const data = await res.json();
+        console.log('Metadata recibida:', data);
 
         if (data.title) {
-          // Intentar separar titulo y artista (formato: "Artista - Cancion")
-          const parts = data.title.split(' - ');
-          if (parts.length >= 2) {
-            setArtista(parts[0].trim());
-            setTitulo(parts.slice(1).join(' - ').trim());
-          } else {
-            setTitulo(data.title);
-            if (data.author_name) {
-              setArtista(data.author_name);
-            }
+          // Intentar separar titulo y artista con varios formatos
+          // Formatos comunes: "Artista - Cancion", "Cancion | Artista", "Artista: Cancion"
+          let artistaEncontrado = '';
+          let tituloEncontrado = data.title;
+
+          // Formato: "Artista - Cancion"
+          if (data.title.includes(' - ')) {
+            const parts = data.title.split(' - ');
+            artistaEncontrado = parts[0].trim();
+            tituloEncontrado = parts.slice(1).join(' - ').trim();
+          }
+          // Formato: "Cancion | Artista"
+          else if (data.title.includes(' | ')) {
+            const parts = data.title.split(' | ');
+            tituloEncontrado = parts[0].trim();
+            artistaEncontrado = parts[1]?.trim() || '';
+          }
+          // Formato: "Artista: Cancion"
+          else if (data.title.includes(': ')) {
+            const parts = data.title.split(': ');
+            artistaEncontrado = parts[0].trim();
+            tituloEncontrado = parts.slice(1).join(': ').trim();
+          }
+
+          setTitulo(tituloEncontrado);
+
+          // Para Spotify, author_name es el artista real
+          if (spotifyMatch && data.author_name) {
+            setArtista(data.author_name);
+          } else if (artistaEncontrado) {
+            setArtista(artistaEncontrado);
+          } else if (data.author_name) {
+            // Para YouTube, author_name es el canal (puede ser el artista)
+            setArtista(data.author_name);
           }
         }
 

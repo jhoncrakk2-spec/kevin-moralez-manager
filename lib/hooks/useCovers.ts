@@ -48,20 +48,30 @@ export function useCovers() {
   }, []);
 
   async function add(cover: Omit<Cover, 'id' | 'created_at' | 'updated_at'>) {
-    const { error } = await supabase.from('covers').insert(cover);
+    console.log('Intentando guardar cover:', cover);
+    const { data, error } = await supabase.from('covers').insert(cover).select();
+    console.log('Resultado:', { data, error });
     if (error) {
       console.error('Error adding cover:', error);
       alert(`Error al guardar: ${error.message}`);
+    } else {
+      alert('Cover guardado exitosamente!');
     }
   }
 
   async function update(cover: Cover) {
     const { id, created_at, ...rest } = cover;
-    const { error } = await supabase
+    console.log('Actualizando cover:', { id, rest });
+    const { data, error } = await supabase
       .from('covers')
       .update({ ...rest, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) console.error('Error updating cover:', error);
+      .eq('id', id)
+      .select();
+    console.log('Resultado update:', { data, error });
+    if (error) {
+      console.error('Error updating cover:', error);
+      alert(`Error al actualizar: ${error.message}`);
+    }
   }
 
   async function remove(id: string) {
