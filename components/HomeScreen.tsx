@@ -230,6 +230,7 @@ export function HomeScreen({
       <Section title="Proximo lanzamiento">
         {(() => {
           const next =
+            covers.find((c) => c.status === 'listo') ||
             covers.find((c) => c.status === 'editado') ||
             covers.find((c) => c.status === 'grabado');
           if (!next) return <EmptyHint text="Ningun cover listo aun." />;
