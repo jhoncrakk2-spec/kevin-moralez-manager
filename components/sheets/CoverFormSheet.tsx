@@ -35,10 +35,11 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
 
     // Detectar si es un link de YouTube
     const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)/);
+    // Detectar si es un link de Spotify
+    const spotifyMatch = url.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
 
-    if (youtubeMatch && !titulo) {
+    if ((youtubeMatch || spotifyMatch) && !titulo) {
       setFetching(true);
-      const videoId = youtubeMatch[1];
 
       try {
         // Usar noembed.com que no tiene problemas de CORS
@@ -55,13 +56,21 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
               setTitulo(data.title);
             }
           }
+          // Usar thumbnail si está disponible (Spotify lo incluye)
+          if (data.thumbnail_url) {
+            setImagen(data.thumbnail_url);
+          }
         }
       } catch (e) {
-        console.error('Error fetching YouTube data:', e);
+        console.error('Error fetching data:', e);
       }
 
-      // Siempre usar thumbnail de YouTube (no requiere API)
-      setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+      // Para YouTube, usar thumbnail directo
+      if (youtubeMatch) {
+        const videoId = youtubeMatch[1];
+        setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+      }
+
       setFetching(false);
     }
   }
@@ -86,12 +95,12 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
     >
       <div className="space-y-4">
         <div>
-          <Label>Link de YouTube (opcional)</Label>
+          <Label>Link de YouTube o Spotify</Label>
           <div className="relative">
             <Input
               value={linkExterno}
               onChange={(e) => handleUrlChange(e.target.value)}
-              placeholder="https://youtube.com/watch?v=..."
+              placeholder="Pega link de YouTube o Spotify..."
             />
             {fetching && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -99,7 +108,7 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
               </div>
             )}
           </div>
-          <p className="text-xs text-zinc-500 mt-1">Pega el link y se llenara automaticamente</p>
+          <p className="text-xs text-zinc-500 mt-1">Se llenara automaticamente el titulo y portada</p>
         </div>
         <div>
           <Label>Titulo de la cancion</Label>
