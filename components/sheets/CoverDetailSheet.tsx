@@ -189,7 +189,24 @@ export function CoverDetailSheet({
 
         {/* Checklist */}
         <div>
-          <Label>Checklist de produccion</Label>
+          <div className="flex items-center justify-between mb-1">
+            <Label>Checklist de produccion</Label>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  const allChecked = CHECKLIST_BASE.every((item) => data.checklist[item]);
+                  const newChecklist = CHECKLIST_BASE.reduce(
+                    (acc, item) => ({ ...acc, [item]: !allChecked }),
+                    {}
+                  );
+                  setData({ ...data, checklist: newChecklist });
+                }}
+                className="text-xs text-yellow-400 hover:text-yellow-300"
+              >
+                {CHECKLIST_BASE.every((item) => data.checklist[item]) ? 'Desmarcar todos' : 'Marcar todos'}
+              </button>
+            )}
+          </div>
           <div className="space-y-1.5">
             {CHECKLIST_BASE.map((item, i) => {
               const checked = !!data.checklist[item];
