@@ -71,6 +71,16 @@ export function HomeScreen({
     }
   }
 
+  function testNotification() {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Prueba de notificación', {
+        body: 'Las notificaciones funcionan correctamente!',
+      });
+    } else {
+      alert('Primero activa las notificaciones tocando la campana');
+    }
+  }
+
   const hasCustomPhoto = artist.foto_url !== 'https://images.weserv.nl/?url=i.scdn.co/image/ab67616100005174893a84fa2d1b9ae008fe1eaa';
 
   return (
@@ -270,6 +280,12 @@ export function HomeScreen({
           <QuickAction label="Publicacion" icon={Radio} onClick={() => go('redes')} />
           <QuickAction label="Metricas" icon={BarChart3} onClick={() => go('mas')} />
         </div>
+        <button
+          onClick={testNotification}
+          className="w-full mt-3 text-xs text-zinc-500 hover:text-yellow-400 transition"
+        >
+          Probar notificación
+        </button>
       </Section>
 
       {photoSheet && (
