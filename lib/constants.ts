@@ -21,6 +21,7 @@ export const COVER_STATUSES: StatusConfig[] = [
   { id: 'ensayo', label: 'Ensayo', accent: 'bg-zinc-800/50 text-yellow-400' },
   { id: 'grabado', label: 'Grabado', accent: 'bg-orange-900/60 text-orange-200' },
   { id: 'editado', label: 'Editado', accent: 'bg-yellow-900/60 text-yellow-100' },
+  { id: 'listo', label: 'Listo para salir', accent: 'bg-blue-900/60 text-blue-200' },
   { id: 'publicado', label: 'Publicado', accent: 'bg-emerald-900/60 text-emerald-200' },
 ];
 

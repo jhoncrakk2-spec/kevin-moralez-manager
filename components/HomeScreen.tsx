@@ -41,7 +41,7 @@ export function HomeScreen({
   const { isAdmin, signOut } = useAuth();
   const today = getTodayISO();
   const pubCount = covers.filter((c) => c.status === 'publicado').length;
-  const proxCount = covers.filter((c) => c.status === 'editado' || c.status === 'grabado').length;
+  const proxCount = covers.filter((c) => c.status === 'editado' || c.status === 'grabado' || c.status === 'listo').length;
   const eventosHoy = agenda
     .filter((a) => a.fecha === today)
     .sort((a, b) => a.hora.localeCompare(b.hora));

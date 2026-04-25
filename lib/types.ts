@@ -26,7 +26,7 @@ export interface Cover {
   updated_at?: string;
 }
 
-export type CoverStatus = 'ideas' | 'ensayo' | 'grabado' | 'editado' | 'publicado';
+export type CoverStatus = 'ideas' | 'ensayo' | 'grabado' | 'editado' | 'listo' | 'publicado';
 
 export interface Evento {
   id: string;
