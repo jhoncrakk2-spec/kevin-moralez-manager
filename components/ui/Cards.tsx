@@ -51,9 +51,10 @@ interface StatCardProps {
   value: number;
   icon: LucideIcon;
   tone: 'amber' | 'emerald' | 'red' | 'stone';
+  onClick?: () => void;
 }
 
-export function StatCard({ label, value, icon: Icon, tone }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, tone, onClick }: StatCardProps) {
   const tones = {
     amber: 'text-yellow-400',
     emerald: 'text-emerald-400',
@@ -61,8 +62,13 @@ export function StatCard({ label, value, icon: Icon, tone }: StatCardProps) {
     stone: 'text-zinc-300',
   };
 
+  const Component = onClick ? 'button' : 'div';
+
   return (
-    <div className="bg-zinc-900 rounded-2xl p-4 relative overflow-hidden">
+    <Component
+      onClick={onClick}
+      className={`bg-zinc-900 rounded-2xl p-4 relative overflow-hidden text-left ${onClick ? 'active:scale-95 transition cursor-pointer' : ''}`}
+    >
       <div className="absolute top-3 right-3">
         <Icon className={`w-4 h-4 ${tones[tone]} opacity-80`} />
       </div>
@@ -70,7 +76,7 @@ export function StatCard({ label, value, icon: Icon, tone }: StatCardProps) {
       <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-semibold mt-2">
         {label}
       </div>
-    </div>
+    </Component>
   );
 }
 

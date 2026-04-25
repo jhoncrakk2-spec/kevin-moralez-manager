@@ -108,10 +108,10 @@ export function HomeScreen({
 
       {/* Stats */}
       <div className="px-5 grid grid-cols-2 gap-3 mt-2">
-        <StatCard label="Covers publicados" value={pubCount} icon={Video} tone="amber" />
-        <StatCard label="Listos para salir" value={proxCount} icon={Upload} tone="emerald" />
-        <StatCard label="Pendientes hoy" value={pendHoy} icon={Clock} tone="red" />
-        <StatCard label="Total canciones" value={covers.length} icon={Disc3} tone="stone" />
+        <StatCard label="Covers publicados" value={pubCount} icon={Video} tone="amber" onClick={() => go('covers')} />
+        <StatCard label="Listos para salir" value={proxCount} icon={Upload} tone="emerald" onClick={() => go('covers')} />
+        <StatCard label="Pendientes hoy" value={pendHoy} icon={Clock} tone="red" onClick={() => go('agenda')} />
+        <StatCard label="Total canciones" value={covers.length} icon={Disc3} tone="stone" onClick={() => go('covers')} />
       </div>
 
       {/* Hoy */}
