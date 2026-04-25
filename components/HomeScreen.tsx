@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Video, Upload, Clock, Disc3, Music2, Calendar, Radio, BarChart3, ChevronRight, Camera, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Video, Upload, Clock, Disc3, Music2, Calendar, Radio, BarChart3, ChevronRight, Camera, LogOut, Bell, BellOff } from 'lucide-react';
 import {
   StatCard,
   Section,
@@ -49,6 +49,27 @@ export function HomeScreen({
   const pendHoy =
     eventosHoy.filter((e) => !e.hecho).length + postsHoy.filter((p) => !p.publicado).length;
   const [photoSheet, setPhotoSheet] = useState(false);
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default');
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotifPermission(Notification.permission);
+    } else {
+      setNotifPermission('unsupported');
+    }
+  }, []);
+
+  async function requestNotifications() {
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      setNotifPermission(permission);
+      if (permission === 'granted') {
+        new Notification('Notificaciones activadas', {
+          body: 'Recibirás recordatorios de tus eventos programados',
+        });
+      }
+    }
+  }
 
   const hasCustomPhoto = artist.foto_url !== 'https://images.weserv.nl/?url=i.scdn.co/image/ab67616100005174893a84fa2d1b9ae008fe1eaa';
 
@@ -65,10 +86,27 @@ export function HomeScreen({
             <div className="text-yellow-400 text-[10px] uppercase tracking-[0.3em] font-bold">
               Manager Dashboard
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="text-zinc-500 text-[10px] uppercase tracking-widest">
                 {new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
               </div>
+              {notifPermission !== 'unsupported' && (
+                <button
+                  onClick={requestNotifications}
+                  className={`p-2 transition ${
+                    notifPermission === 'granted'
+                      ? 'text-yellow-400'
+                      : 'text-zinc-500 hover:text-yellow-400'
+                  }`}
+                  title={notifPermission === 'granted' ? 'Notificaciones activas' : 'Activar notificaciones'}
+                >
+                  {notifPermission === 'granted' ? (
+                    <Bell className="w-4 h-4" />
+                  ) : (
+                    <BellOff className="w-4 h-4" />
+                  )}
+                </button>
+              )}
               <button
                 onClick={signOut}
                 className="p-2 text-zinc-500 hover:text-rose-400 transition"
