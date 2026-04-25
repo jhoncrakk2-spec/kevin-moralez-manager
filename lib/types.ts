@@ -17,7 +17,7 @@ export interface Cover {
   titulo: string;
   artista_original: string;
   status: CoverStatus;
-  fecha_publicacion: string;
+  fecha_publicacion: string | null;
   link_externo: string;
   imagen_url: string;
   notas: string;

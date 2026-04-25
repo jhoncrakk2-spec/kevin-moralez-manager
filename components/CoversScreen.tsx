@@ -39,7 +39,7 @@ export function CoversScreen({ covers, onAdd, onUpdate, onDelete }: CoversScreen
       titulo: data.titulo,
       artista_original: data.artista_original,
       status: data.status,
-      fecha_publicacion: '',
+      fecha_publicacion: null,
       link_externo: data.link_externo,
       imagen_url: data.imagen_url,
       notas: data.notas,
