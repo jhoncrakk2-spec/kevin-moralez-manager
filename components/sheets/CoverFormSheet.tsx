@@ -5,7 +5,7 @@ import { Sheet } from './Sheet';
 import { Input, Textarea, Select, Label, ImageInput, PrimaryBtn } from '@/components/ui';
 import { COVER_STATUSES } from '@/lib/constants';
 import type { CoverStatus } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 
 interface CoverFormData {
   titulo: string;
@@ -30,49 +30,56 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
   const [linkExterno, setLinkExterno] = useState('');
   const [fetching, setFetching] = useState(false);
 
-  async function handleUrlChange(url: string) {
-    setLinkExterno(url);
+  async function fetchMetadata() {
+    if (!linkExterno || fetching) return;
 
-    // Detectar si es un link de YouTube
-    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)/);
-    // Detectar si es un link de Spotify
-    const spotifyMatch = url.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+    const url = linkExterno;
 
-    if ((youtubeMatch || spotifyMatch) && !titulo) {
-      setFetching(true);
+    // Detectar YouTube (varios formatos)
+    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/i);
+    // Detectar Spotify
+    const spotifyMatch = url.match(/open\.spotify\.com\/(?:track|intl-[a-z]+\/track)\/([a-zA-Z0-9]+)/i);
 
-      try {
-        // Usar noembed.com que no tiene problemas de CORS
-        const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.title) {
-            // Intentar separar titulo y artista (formato comun: "Artista - Cancion")
-            const parts = data.title.split(' - ');
-            if (parts.length >= 2) {
-              setArtista(parts[0].trim());
-              setTitulo(parts.slice(1).join(' - ').trim());
-            } else {
-              setTitulo(data.title);
+    if (!youtubeMatch && !spotifyMatch) {
+      return;
+    }
+
+    setFetching(true);
+
+    try {
+      const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+      if (res.ok) {
+        const data = await res.json();
+
+        if (data.title) {
+          // Intentar separar titulo y artista
+          const parts = data.title.split(' - ');
+          if (parts.length >= 2) {
+            setArtista(parts[0].trim());
+            setTitulo(parts.slice(1).join(' - ').trim());
+          } else {
+            setTitulo(data.title);
+            if (data.author_name) {
+              setArtista(data.author_name);
             }
           }
-          // Usar thumbnail si está disponible (Spotify lo incluye)
-          if (data.thumbnail_url) {
-            setImagen(data.thumbnail_url);
-          }
         }
-      } catch (e) {
-        console.error('Error fetching data:', e);
-      }
 
-      // Para YouTube, usar thumbnail directo
-      if (youtubeMatch) {
-        const videoId = youtubeMatch[1];
-        setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+        if (data.thumbnail_url) {
+          setImagen(data.thumbnail_url);
+        }
       }
-
-      setFetching(false);
+    } catch (e) {
+      console.error('Error:', e);
     }
+
+    // Para YouTube, usar thumbnail directo (mejor calidad)
+    if (youtubeMatch) {
+      const videoId = youtubeMatch[1];
+      setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+    }
+
+    setFetching(false);
   }
 
   function handleSave() {
@@ -96,19 +103,27 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
       <div className="space-y-4">
         <div>
           <Label>Link de YouTube o Spotify</Label>
-          <div className="relative">
+          <div className="flex gap-2">
             <Input
               value={linkExterno}
-              onChange={(e) => handleUrlChange(e.target.value)}
-              placeholder="Pega link de YouTube o Spotify..."
+              onChange={(e) => setLinkExterno(e.target.value)}
+              placeholder="Pega link aqui..."
+              className="flex-1"
             />
-            {fetching && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="w-4 h-4 animate-spin text-yellow-400" />
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={fetchMetadata}
+              disabled={fetching || !linkExterno}
+              className="px-4 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl transition flex items-center justify-center"
+            >
+              {fetching ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
+            </button>
           </div>
-          <p className="text-xs text-zinc-500 mt-1">Se llenara automaticamente el titulo y portada</p>
+          <p className="text-xs text-zinc-500 mt-1">Pega el link y presiona el boton para llenar automaticamente</p>
         </div>
         <div>
           <Label>Titulo de la cancion</Label>
