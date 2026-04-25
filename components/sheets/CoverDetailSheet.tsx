@@ -161,8 +161,8 @@ export function CoverDetailSheet({
             <Label>Fecha pub.</Label>
             <Input
               type="date"
-              value={data.fecha_publicacion}
-              onChange={(e) => setData({ ...data, fecha_publicacion: e.target.value })}
+              value={data.fecha_publicacion || ''}
+              onChange={(e) => setData({ ...data, fecha_publicacion: e.target.value || null })}
               readOnly={!isAdmin}
             />
           </div>
