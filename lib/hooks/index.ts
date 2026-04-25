@@ -5,3 +5,4 @@ export { usePosts } from './usePosts';
 export { useMetricas } from './useMetricas';
 export { useContactos } from './useContactos';
 export { useArtist } from './useArtist';
+export { useNotifications } from './useNotifications';

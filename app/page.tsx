@@ -9,7 +9,7 @@ import { CoversScreen } from '@/components/CoversScreen';
 import { AgendaScreen } from '@/components/AgendaScreen';
 import { RedesScreen } from '@/components/RedesScreen';
 import { MasScreen } from '@/components/MasScreen';
-import { useCovers, useAgenda, usePosts, useMetricas, useContactos, useArtist } from '@/lib/hooks';
+import { useCovers, useAgenda, usePosts, useMetricas, useContactos, useArtist, useNotifications } from '@/lib/hooks';
 import { useAuth } from '@/components/AuthGate';
 
 export default function HomePage() {
@@ -23,6 +23,9 @@ export default function HomePage() {
   const { metricas, loading: loadingMetricas, add: addMetrica, remove: removeMetrica } = useMetricas();
   const { contactos, loading: loadingContactos, add: addContacto, update: updateContacto, remove: removeContacto } = useContactos();
   const { artist, loading: loadingArtist, updatePhoto } = useArtist();
+
+  // Activar notificaciones para eventos de hoy
+  useNotifications(eventos);
 
   const loading = loadingAuth || loadingCovers || loadingAgenda || loadingPosts || loadingMetricas || loadingContactos || loadingArtist;
 
