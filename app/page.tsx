@@ -1,65 +1,104 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Disc3 } from 'lucide-react';
+import { BottomNav, type TabId } from '@/components/BottomNav';
+import { HomeScreen } from '@/components/HomeScreen';
+import { CoversScreen } from '@/components/CoversScreen';
+import { AgendaScreen } from '@/components/AgendaScreen';
+import { RedesScreen } from '@/components/RedesScreen';
+import { MasScreen } from '@/components/MasScreen';
+import { useCovers, useAgenda, usePosts, useMetricas, useContactos, useArtist } from '@/lib/hooks';
+import { useAuth } from '@/components/AuthGate';
+
+export default function HomePage() {
+  const router = useRouter();
+  const { user, loading: loadingAuth } = useAuth();
+  const [tab, setTab] = useState<TabId>('home');
+
+  const { covers, loading: loadingCovers, add: addCover, update: updateCover, remove: removeCover } = useCovers();
+  const { eventos, loading: loadingAgenda, add: addEvento, update: updateEvento, remove: removeEvento, toggleHecho } = useAgenda();
+  const { posts, loading: loadingPosts, add: addPost, update: updatePost, remove: removePost, togglePublicado } = usePosts();
+  const { metricas, loading: loadingMetricas, add: addMetrica, remove: removeMetrica } = useMetricas();
+  const { contactos, loading: loadingContactos, add: addContacto, update: updateContacto, remove: removeContacto } = useContactos();
+  const { artist, loading: loadingArtist, updatePhoto } = useArtist();
+
+  const loading = loadingAuth || loadingCovers || loadingAgenda || loadingPosts || loadingMetricas || loadingContactos || loadingArtist;
+
+  // Redirigir a login si no hay usuario
+  if (!loadingAuth && !user) {
+    router.push('/login');
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-yellow-400 font-body">
+        <div className="text-center">
+          <Disc3 className="w-10 h-10 mx-auto animate-spin text-yellow-400" />
+          <div className="mt-4 font-display text-2xl tracking-wider">Cargando datos...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen font-body text-zinc-100 bg-black">
+      <div className="max-w-md mx-auto relative pb-28">
+        {/* Top decorative bar */}
+        <div className="h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+
+        {tab === 'home' && (
+          <HomeScreen
+            covers={covers}
+            agenda={eventos}
+            posts={posts}
+            artist={artist}
+            onPhotoChange={updatePhoto}
+            go={setTab}
+          />
+        )}
+        {tab === 'covers' && (
+          <CoversScreen
+            covers={covers}
+            onAdd={addCover}
+            onUpdate={updateCover}
+            onDelete={removeCover}
+          />
+        )}
+        {tab === 'agenda' && (
+          <AgendaScreen
+            eventos={eventos}
+            onAdd={addEvento}
+            onUpdate={updateEvento}
+            onDelete={removeEvento}
+            onToggleHecho={toggleHecho}
+          />
+        )}
+        {tab === 'redes' && (
+          <RedesScreen
+            posts={posts}
+            onAdd={addPost}
+            onUpdate={updatePost}
+            onDelete={removePost}
+            onTogglePublicado={togglePublicado}
+          />
+        )}
+        {tab === 'mas' && (
+          <MasScreen
+            metricas={metricas}
+            contactos={contactos}
+            onAddMetrica={addMetrica}
+            onDeleteMetrica={removeMetrica}
+            onAddContacto={addContacto}
+            onUpdateContacto={updateContacto}
+            onDeleteContacto={removeContacto}
+          />
+        )}
+
+        <BottomNav tab={tab} setTab={setTab} />
+      </div>
     </div>
   );
 }

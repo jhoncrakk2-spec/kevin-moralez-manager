@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Circulo de fondo amarillo -->
+  <circle cx="100" cy="100" r="96" fill="#facc15" stroke="#000000" stroke-width="4"/>
+
+  <!-- Letras KM en negro, estilo Bebas Neue -->
+  <text x="100" y="130" text-anchor="middle" font-family="Impact, 'Bebas Neue', sans-serif" font-size="90" font-weight="bold" fill="#000000" letter-spacing="2">KM</text>
+
+  <!-- Punto separador decorativo -->
+  <circle cx="100" cy="65" r="6" fill="#000000"/>
+</svg>
