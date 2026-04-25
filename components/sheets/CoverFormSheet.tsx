@@ -33,26 +33,38 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
   async function fetchMetadata() {
     if (!linkExterno || fetching) return;
 
-    const url = linkExterno;
+    const url = linkExterno.trim();
 
-    // Detectar YouTube (varios formatos)
+    // Detectar YouTube
     const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/i);
     // Detectar Spotify
-    const spotifyMatch = url.match(/open\.spotify\.com\/(?:track|intl-[a-z]+\/track)\/([a-zA-Z0-9]+)/i);
+    const spotifyMatch = url.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?track\/([a-zA-Z0-9]+)/i);
 
     if (!youtubeMatch && !spotifyMatch) {
+      alert('Pega un link válido de YouTube o Spotify');
       return;
     }
 
     setFetching(true);
 
     try {
-      const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+      let apiUrl = '';
+
+      if (youtubeMatch) {
+        // YouTube: usar noembed
+        apiUrl = `https://noembed.com/embed?url=${encodeURIComponent(url)}`;
+      } else if (spotifyMatch) {
+        // Spotify: usar su API directa
+        apiUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`;
+      }
+
+      const res = await fetch(apiUrl);
+
       if (res.ok) {
         const data = await res.json();
 
         if (data.title) {
-          // Intentar separar titulo y artista
+          // Intentar separar titulo y artista (formato: "Artista - Cancion")
           const parts = data.title.split(' - ');
           if (parts.length >= 2) {
             setArtista(parts[0].trim());
@@ -65,25 +77,32 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
           }
         }
 
+        // Thumbnail
         if (data.thumbnail_url) {
           setImagen(data.thumbnail_url);
         }
+
+        // Para YouTube, usar thumbnail de mejor calidad
+        if (youtubeMatch) {
+          const videoId = youtubeMatch[1];
+          setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+        }
+      } else {
+        alert('No se pudo obtener la información. Verifica el link.');
       }
     } catch (e) {
       console.error('Error:', e);
-    }
-
-    // Para YouTube, usar thumbnail directo (mejor calidad)
-    if (youtubeMatch) {
-      const videoId = youtubeMatch[1];
-      setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+      alert('Error al buscar. Intenta de nuevo.');
     }
 
     setFetching(false);
   }
 
   function handleSave() {
-    if (!titulo) return;
+    if (!titulo) {
+      alert('El título es requerido');
+      return;
+    }
     onSave({
       titulo,
       artista_original: artista,
@@ -107,14 +126,14 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
             <Input
               value={linkExterno}
               onChange={(e) => setLinkExterno(e.target.value)}
-              placeholder="Pega link aqui..."
+              placeholder="Pega link aquí..."
               className="flex-1"
             />
             <button
               type="button"
               onClick={fetchMetadata}
               disabled={fetching || !linkExterno}
-              className="px-4 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl transition flex items-center justify-center"
+              className="px-4 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl transition flex items-center justify-center min-w-[50px]"
             >
               {fetching ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -123,10 +142,10 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
               )}
             </button>
           </div>
-          <p className="text-xs text-zinc-500 mt-1">Pega el link y presiona el boton para llenar automaticamente</p>
+          <p className="text-xs text-zinc-500 mt-1">Pega el link y presiona 🔍</p>
         </div>
         <div>
-          <Label>Titulo de la cancion</Label>
+          <Label>Título de la canción *</Label>
           <Input
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
