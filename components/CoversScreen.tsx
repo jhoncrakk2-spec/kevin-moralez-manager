@@ -96,6 +96,7 @@ export function CoversScreen({ covers, onAdd, onUpdate, onDelete }: CoversScreen
               <CoverArt src={c.imagen_url} alt={c.titulo} className="w-14 h-14 shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-zinc-100 truncate">{c.titulo}</div>
+                <div className="text-xs text-zinc-500 italic truncate">Kevin Moralez</div>
                 <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                   <StatusPill status={c.status} />
                   {c.status === 'publicado' && c.fecha_publicacion && (
