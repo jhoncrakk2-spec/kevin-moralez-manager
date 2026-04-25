@@ -33,13 +33,14 @@ export function CoversScreen({ covers, onAdd, onUpdate, onDelete }: CoversScreen
     status: CoverStatus;
     notas: string;
     imagen_url: string;
+    link_externo: string;
   }) {
     onAdd({
       titulo: data.titulo,
       artista_original: data.artista_original,
       status: data.status,
       fecha_publicacion: '',
-      link_externo: '',
+      link_externo: data.link_externo,
       imagen_url: data.imagen_url,
       notas: data.notas,
       checklist: {},
