@@ -140,14 +140,6 @@ export function CoverDetailSheet({
             readOnly={!isAdmin}
           />
         </div>
-        <div>
-          <Label>Artista original</Label>
-          <Input
-            value={data.artista_original}
-            onChange={(e) => setData({ ...data, artista_original: e.target.value })}
-            readOnly={!isAdmin}
-          />
-        </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label>Estado</Label>

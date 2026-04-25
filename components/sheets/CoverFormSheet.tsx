@@ -23,7 +23,6 @@ interface CoverFormSheetProps {
 
 export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
   const [titulo, setTitulo] = useState('');
-  const [artista, setArtista] = useState('');
   const [status, setStatus] = useState<CoverStatus>('ideas');
   const [notas, setNotas] = useState('');
   const [imagen, setImagen] = useState('');
@@ -55,20 +54,13 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
           const data = await res.json();
 
           if (data.title) {
-            // Intentar separar titulo y artista (formato: "Artista - Cancion")
-            if (data.title.includes(' - ')) {
-              const parts = data.title.split(' - ');
-              setArtista(parts[0].trim());
-              // Quitar cosas como "(Official Video)" del titulo
-              let titulo = parts.slice(1).join(' - ').trim();
-              titulo = titulo.replace(/\s*\(.*?\)\s*/g, '').trim();
-              setTitulo(titulo);
-            } else {
-              setTitulo(data.title);
-              if (data.author_name) {
-                setArtista(data.author_name);
-              }
+            // Limpiar titulo quitando "(Official Video)" etc.
+            let cleanTitle = data.title.replace(/\s*\(.*?\)\s*/g, '').trim();
+            // Si tiene formato "Artista - Cancion", usar solo la cancion
+            if (cleanTitle.includes(' - ')) {
+              cleanTitle = cleanTitle.split(' - ').slice(1).join(' - ').trim();
             }
+            setTitulo(cleanTitle);
           }
 
           // Thumbnail de alta calidad
@@ -76,34 +68,15 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
           setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
         }
       } else if (spotifyMatch) {
-        // Spotify: obtener titulo y luego buscar artista en iTunes
-        const trackId = spotifyMatch[1];
+        // Spotify: obtener titulo
         const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
 
         if (res.ok) {
           const data = await res.json();
-          const songTitle = data.title || '';
-          setTitulo(songTitle);
+          setTitulo(data.title || '');
 
           if (data.thumbnail_url) {
             setImagen(data.thumbnail_url);
-          }
-
-          // Buscar en iTunes para obtener el artista
-          if (songTitle) {
-            try {
-              const itunesRes = await fetch(
-                `https://itunes.apple.com/search?term=${encodeURIComponent(songTitle)}&media=music&limit=1`
-              );
-              if (itunesRes.ok) {
-                const itunesData = await itunesRes.json();
-                if (itunesData.results && itunesData.results.length > 0) {
-                  setArtista(itunesData.results[0].artistName);
-                }
-              }
-            } catch (e) {
-              console.log('iTunes search failed, continuing without artist');
-            }
           }
         }
       }
@@ -122,7 +95,7 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
     }
     onSave({
       titulo,
-      artista_original: artista,
+      artista_original: '',
       status,
       notas,
       imagen_url: imagen,
@@ -167,14 +140,6 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Ej. La Diabla"
-          />
-        </div>
-        <div>
-          <Label>Artista original</Label>
-          <Input
-            value={artista}
-            onChange={(e) => setArtista(e.target.value)}
-            placeholder="Ej. Xavi"
           />
         </div>
         <div>

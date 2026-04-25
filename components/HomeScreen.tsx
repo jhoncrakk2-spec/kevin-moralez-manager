@@ -211,7 +211,7 @@ export function HomeScreen({
                     {next.titulo}
                   </div>
                   <div className="text-zinc-400 text-xs font-serif-display italic truncate">
-                    {next.artista_original}
+                    Kevin Moralez
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-yellow-400 shrink-0" />
