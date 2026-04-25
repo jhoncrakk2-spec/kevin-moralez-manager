@@ -38,10 +38,11 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
 
     if (youtubeMatch && !titulo) {
       setFetching(true);
+      const videoId = youtubeMatch[1];
+
       try {
-        // Usar oEmbed de YouTube para obtener el titulo
-        const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-        const res = await fetch(oembedUrl);
+        // Usar noembed.com que no tiene problemas de CORS
+        const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.title) {
@@ -54,13 +55,13 @@ export function CoverFormSheet({ onClose, onSave }: CoverFormSheetProps) {
               setTitulo(data.title);
             }
           }
-          // Usar thumbnail de YouTube
-          const videoId = youtubeMatch[1];
-          setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
         }
       } catch (e) {
         console.error('Error fetching YouTube data:', e);
       }
+
+      // Siempre usar thumbnail de YouTube (no requiere API)
+      setImagen(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
       setFetching(false);
     }
   }
