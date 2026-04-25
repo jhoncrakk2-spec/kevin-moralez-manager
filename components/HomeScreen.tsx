@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Video, Upload, Clock, Disc3, Music2, Calendar, Radio, BarChart3, ChevronRight, Camera } from 'lucide-react';
+import { Video, Upload, Clock, Disc3, Music2, Calendar, Radio, BarChart3, ChevronRight, Camera, LogOut } from 'lucide-react';
 import {
   StatCard,
   Section,
@@ -38,7 +38,7 @@ export function HomeScreen({
   onPhotoChange,
   go,
 }: HomeScreenProps) {
-  const { isAdmin } = useAuth();
+  const { isAdmin, signOut } = useAuth();
   const today = getTodayISO();
   const pubCount = covers.filter((c) => c.status === 'publicado').length;
   const proxCount = covers.filter((c) => c.status === 'editado' || c.status === 'grabado').length;
@@ -65,25 +65,31 @@ export function HomeScreen({
             <div className="text-yellow-400 text-[10px] uppercase tracking-[0.3em] font-bold">
               Manager Dashboard
             </div>
-            <div className="text-zinc-500 text-[10px] uppercase tracking-widest">
-              {new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+            <div className="flex items-center gap-3">
+              <div className="text-zinc-500 text-[10px] uppercase tracking-widest">
+                {new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+              </div>
+              <button
+                onClick={signOut}
+                className="p-2 text-zinc-500 hover:text-rose-400 transition"
+                title="Cerrar sesión"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
           <div className="flex flex-col items-center text-center">
             <button
-              onClick={() => isAdmin && setPhotoSheet(true)}
-              className={`relative shrink-0 mb-4 ${isAdmin ? 'active:scale-95' : ''} transition`}
-              disabled={!isAdmin}
+              onClick={() => setPhotoSheet(true)}
+              className="relative shrink-0 mb-4 active:scale-95 transition"
             >
               <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-yellow-400 ring-offset-4 ring-offset-black shadow-2xl shadow-yellow-900/30">
                 <ArtistPhoto src={artist.foto_url} alt={artist.nombre} className="w-full h-full" />
               </div>
-              {isAdmin && (
-                <div className="absolute -bottom-1 -right-1 w-9 h-9 bg-yellow-400 rounded-full border-[3px] border-black flex items-center justify-center shadow-lg">
-                  <Camera className="w-4 h-4 text-black" strokeWidth={2.75} />
-                </div>
-              )}
+              <div className="absolute -bottom-1 -right-1 w-9 h-9 bg-yellow-400 rounded-full border-[3px] border-black flex items-center justify-center shadow-lg">
+                <Camera className="w-4 h-4 text-black" strokeWidth={2.75} />
+              </div>
             </button>
 
             <h1 className="font-display text-5xl text-white leading-[0.9] tracking-wide">
