@@ -49,7 +49,10 @@ export function useCovers() {
 
   async function add(cover: Omit<Cover, 'id' | 'created_at' | 'updated_at'>) {
     const { error } = await supabase.from('covers').insert(cover);
-    if (error) console.error('Error adding cover:', error);
+    if (error) {
+      console.error('Error adding cover:', error);
+      alert(`Error al guardar: ${error.message}`);
+    }
   }
 
   async function update(cover: Cover) {

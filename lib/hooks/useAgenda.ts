@@ -50,7 +50,10 @@ export function useAgenda() {
 
   async function add(evento: Omit<Evento, 'id' | 'created_at'>) {
     const { error } = await supabase.from('agenda').insert(evento);
-    if (error) console.error('Error adding evento:', error);
+    if (error) {
+      console.error('Error adding evento:', error);
+      alert(`Error al guardar: ${error.message}`);
+    }
   }
 
   async function update(evento: Evento) {
