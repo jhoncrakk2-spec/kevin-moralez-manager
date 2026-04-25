@@ -39,11 +39,9 @@ export function useArtist() {
   }, []);
 
   async function updatePhoto(foto_url: string | null) {
-    if (!artist) return;
-    const { error } = await supabase
-      .from('artist')
-      .update({ foto_url: foto_url || ARTIST_DEFAULT.foto_url, updated_at: new Date().toISOString() })
-      .eq('id', artist.id);
+    const { error } = await supabase.rpc('update_artist_photo', {
+      new_foto_url: foto_url || ARTIST_DEFAULT.foto_url,
+    });
     if (error) console.error('Error updating photo:', error);
   }
 
